@@ -204,7 +204,7 @@ function initCounters() {
 
 /* ── TYPING ANIMATION ────────────────────────────────────── */
 const CODE = [
-  ['cm','# DevCraft Studio — automation engine'],
+  ['cm','# DevCraft Studio — automation engine '],
   ['',''],
   ['kw','import'], ['',' pandas '], ['kw','as'], ['',' pd'],
   ['',''],
