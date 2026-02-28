@@ -1,435 +1,511 @@
-/* ═══════════════════════════════════════════════════════════════
-   DEVCRAFT STUDIO — MASTER SCRIPT
-   Cursor · Ticker · Counters · Typing · Services · KPIs
-   Currency · ROI · Clock · News · Modals · Theme
-═══════════════════════════════════════════════════════════════ */
-
 'use strict';
+/* ═══════════════════════════════════════════════════════════
+   DEVCRAFT STUDIO — script.js v3
+   No localStorage. No welcome modal. GitHub Pages safe.
+═══════════════════════════════════════════════════════════ */
 
-/* ── DATA ────────────────────────────────────────────────────── */
+/* ── DATA ────────────────────────────────────────────────── */
 const SERVICES = [
-  { icon: '🐍', title: 'Python Automation', desc: 'Eliminate repetitive tasks. Scripts that run while you sleep — scraping, reporting, file processing.', tag: 'automation' },
-  { icon: '🌐', title: 'WordPress Sites', desc: 'Performance-tuned WordPress with custom themes, plugins, and SEO built in from day one.', tag: 'cms' },
-  { icon: '⚡', title: 'Dynamic Web Apps', desc: 'Feature-rich apps with custom APIs, real-time data, and interfaces your users will love.', tag: 'fullstack' },
-  { icon: '🚀', title: 'Static Websites', desc: 'Blazing-fast, secure, SEO-ready static sites. No bloat, no CMS, just pure performance.', tag: 'frontend' },
-  { icon: '📊', title: 'Excel Automation', desc: 'Transform spreadsheet chaos into clean, automated workflows with VBA macros and Python.', tag: 'excel' },
-  { icon: '📈', title: 'Dashboard Digitization', desc: 'Convert static reports into live, interactive dashboards your team will actually use.', tag: 'analytics' },
-  { icon: '📦', title: 'Inventory Systems', desc: 'Real-time stock tracking, demand forecasting, and loss prevention built for your scale.', tag: 'inventory' }
+  { emoji:'🐍', title:'Python Automation',        desc:'Eliminate repetitive tasks forever. Scripts that scrape, report, file-process, and alert — while you sleep.', tag:'automation' },
+  { emoji:'🌐', title:'WordPress Sites',           desc:'Performance-tuned WordPress with custom themes, plugins, and SEO baked in from day one.', tag:'cms' },
+  { emoji:'⚡', title:'Dynamic Web Apps',          desc:'Full-stack feature-rich applications with custom APIs, real-time data feeds, and UI people actually enjoy.', tag:'fullstack' },
+  { emoji:'🚀', title:'Static Websites',           desc:'Blazing-fast, secure, SEO-optimised static sites. Zero bloat. Pure performance.', tag:'frontend' },
+  { emoji:'📊', title:'Excel Automation',          desc:'Turn spreadsheet chaos into clean, automated workflows with VBA macros and Python integrations.', tag:'excel' },
+  { emoji:'📈', title:'Dashboard Digitization',    desc:'Convert static monthly reports into live, interactive dashboards your team will actually open.', tag:'analytics' },
+  { emoji:'📦', title:'Inventory & Stock Systems', desc:'Real-time stock tracking, low-stock alerts, demand forecasting, and loss prevention — built to scale.', tag:'inventory' },
 ];
 
-const WORLD_CLOCKS = [
-  { city: 'Johannesburg', tz: 'Africa/Johannesburg' },
-  { city: 'London', tz: 'Europe/London' },
-  { city: 'New York', tz: 'America/New_York' },
-  { city: 'Dubai', tz: 'Asia/Dubai' },
-  { city: 'Singapore', tz: 'Asia/Singapore' },
-  { city: 'Sydney', tz: 'Australia/Sydney' }
+const TESTIMONIALS = [
+  { text: '"Manual reporting became a live dashboard in two weeks. I didn\'t believe it until I saw it."', who: '— Kagiso M., Operations Lead · JHB' },
+  { text: '"Inventory errors dropped from 12% to under 1% after the automation system went live."', who: '— Priya N., Retail Manager · Sandton' },
+  { text: '"The Python bot saves my team 40 hours every month. Absolutely game-changing."', who: '— André V., Data Analyst · Cape Town' },
 ];
 
-// Simulated FX rates (ZAR base — production would use an API)
-const FX_BASE = { USD: 18.64, EUR: 20.11, GBP: 23.82, ZAR: 1 };
+const CLOCKS = [
+  { city:'Johannesburg', tz:'Africa/Johannesburg' },
+  { city:'London',       tz:'Europe/London' },
+  { city:'New York',     tz:'America/New_York' },
+  { city:'Dubai',        tz:'Asia/Dubai' },
+  { city:'Singapore',    tz:'Asia/Singapore' },
+  { city:'Sydney',       tz:'Australia/Sydney' },
+];
 
-/* ── STATE ───────────────────────────────────────────────────── */
-const state = {
-  theme: localStorage.getItem('theme') || 'dark',
-  serviceIndex: 0,
-  rangeVal: 45,
-  industry: 'retail',
-  fxRates: { ...FX_BASE }
+const FX = { USD: 18.64, EUR: 20.11, GBP: 23.82, ZAR: 1 };
+const IND_MUL = {
+  retail:    { h:1.0,  e:1.0,  s:1.0 },
+  logistics: { h:1.4,  e:0.85, s:1.2 },
+  finance:   { h:0.75, e:1.35, s:0.9 },
 };
 
-/* ── HELPERS ─────────────────────────────────────────────────── */
-const $ = (sel, root = document) => root.querySelector(sel);
-const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
-const lerp = (a, b, t) => a + (b - a) * t;
-const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
+/* ── STATE ───────────────────────────────────────────────── */
+const S = {
+  theme: 'dark',   // default — no localStorage
+  industry: 'retail',
+  quoteIdx: 0,
+  fx: { ...FX },
+};
 
-function formatNum(n, prefix = '', suffix = '') {
-  return prefix + Math.round(n).toLocaleString('en-ZA') + suffix;
-}
+/* ── HELPERS ─────────────────────────────────────────────── */
+const $  = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const lerp  = (a,b,t) => a + (b-a)*t;
+const clamp = (v,mn,mx) => Math.min(Math.max(v,mn),mx);
 
-/* ── THEME ───────────────────────────────────────────────────── */
+/* ── THEME (in-memory only, no localStorage) ─────────────── */
 function setTheme(t) {
-  state.theme = t;
+  S.theme = t;
   document.documentElement.setAttribute('data-theme', t);
-  localStorage.setItem('theme', t);
-  // update orb opacity on light mode
-  $$('.orb').forEach(o => (o.style.opacity = t === 'light' ? '0.25' : '0.5'));
+  const icon = $('#themeBtn');
+  if (icon) icon.textContent = t === 'dark' ? '◑' : '◐';
+  // redraw chart with correct colours
+  const rv = $('#autoRange');
+  if (rv) drawBar(+rv.value);
 }
 
-function toggleTheme() {
-  setTheme(state.theme === 'dark' ? 'light' : 'dark');
+function toggleTheme() { setTheme(S.theme === 'dark' ? 'light' : 'dark'); }
+
+/* ── PARTICLE CANVAS ─────────────────────────────────────── */
+function initCanvas() {
+  const canvas = $('#bgCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  let w, h, pts;
+
+  function resize() {
+    w = canvas.width  = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+
+  function mkPt() {
+    return {
+      x: Math.random() * w,
+      y: Math.random() * h,
+      r: Math.random() * 1.2 + .3,
+      vx: (Math.random() - .5) * .18,
+      vy: (Math.random() - .5) * .18,
+      a: Math.random(),
+    };
+  }
+
+  function initPts() { pts = Array.from({length: 70}, mkPt); }
+
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    const isDark = S.theme === 'dark';
+    const col = isDark ? '200,255,0' : '26,10,255';
+
+    pts.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = w;
+      if (p.x > w) p.x = 0;
+      if (p.y < 0) p.y = h;
+      if (p.y > h) p.y = 0;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(${col},${p.a * .35})`;
+      ctx.fill();
+    });
+
+    // draw faint connecting lines
+    for (let i=0; i<pts.length; i++) {
+      for (let j=i+1; j<pts.length; j++) {
+        const dx = pts[i].x - pts[j].x;
+        const dy = pts[i].y - pts[j].y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 120) {
+          ctx.beginPath();
+          ctx.moveTo(pts[i].x, pts[i].y);
+          ctx.lineTo(pts[j].x, pts[j].y);
+          ctx.strokeStyle = `rgba(${col},${(1 - dist/120) * .06})`;
+          ctx.lineWidth = .5;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+
+  resize();
+  initPts();
+  draw();
+  window.addEventListener('resize', () => { resize(); initPts(); });
 }
 
-/* ── CURSOR ──────────────────────────────────────────────────── */
+/* ── CURSOR ──────────────────────────────────────────────── */
 function initCursor() {
-  const cursor = $('#cursor');
-  const trail = $('#cursorTrail');
-  if (!cursor || window.matchMedia('(max-width:768px)').matches) return;
+  const dot  = $('#curDot');
+  const ring = $('#curRing');
+  if (!dot || window.matchMedia('(max-width:768px)').matches) return;
 
-  let mx = 0, my = 0, tx = 0, ty = 0;
+  let mx=0, my=0, rx=0, ry=0;
 
   document.addEventListener('mousemove', e => {
-    mx = e.clientX;
-    my = e.clientY;
-    cursor.style.left = mx + 'px';
-    cursor.style.top = my + 'px';
+    mx = e.clientX; my = e.clientY;
+    dot.style.left = mx+'px';
+    dot.style.top  = my+'px';
   });
 
-  function animTrail() {
-    tx = lerp(tx, mx, 0.12);
-    ty = lerp(ty, my, 0.12);
-    trail.style.left = tx + 'px';
-    trail.style.top = ty + 'px';
-    requestAnimationFrame(animTrail);
-  }
-  animTrail();
+  (function moveRing() {
+    rx = lerp(rx, mx, .11);
+    ry = lerp(ry, my, .11);
+    ring.style.left = rx+'px';
+    ring.style.top  = ry+'px';
+    requestAnimationFrame(moveRing);
+  })();
 
   document.addEventListener('mouseover', e => {
-    const hov = e.target.closest('a,button,.service-card,.kpi-card,.tool-card,.news-item,.seg,.s-arrow');
-    cursor.classList.toggle('hovering', !!hov);
+    const h = e.target.closest('a,button,.srv-card,.kpi-card,.tool-card,.news-card,.seg,.swap-btn');
+    dot.classList.toggle('big', !!h);
   });
 }
 
-/* ── LIVE TICKER ─────────────────────────────────────────────── */
-function updateTicker() {
-  const now = new Date();
-  const jhb = now.toLocaleTimeString('en-ZA', { timeZone: 'Africa/Johannesburg', hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  const t1 = $('#t-time'); if (t1) t1.textContent = jhb;
-
-  // Jitter FX rates slightly for "live" feel
-  ['USD', 'EUR'].forEach(cur => {
-    state.fxRates[cur] = FX_BASE[cur] + (Math.random() - 0.5) * 0.12;
+/* ── TICKER ──────────────────────────────────────────────── */
+function tickerTick() {
+  // jitter FX
+  ['USD','EUR','GBP'].forEach(c => {
+    S.fx[c] = FX[c] + (Math.random()-.5)*.14;
   });
-  const usdEl = $('#t-usd');  if (usdEl) usdEl.textContent = state.fxRates.USD.toFixed(2);
-  const eurEl = $('#t-eur');  if (eurEl) eurEl.textContent = state.fxRates.EUR.toFixed(2);
-  const usd2 = $('#t-usd2'); if (usd2) usd2.textContent = state.fxRates.USD.toFixed(2);
-  const eur2 = $('#t-eur2'); if (eur2) eur2.textContent = state.fxRates.EUR.toFixed(2);
+  ['t-usd','t-usd2'].forEach(id => { const el=$(id); if(el) el.textContent = S.fx.USD.toFixed(2); });
+  ['t-eur','t-eur2'].forEach(id => { const el=$(id); if(el) el.textContent = S.fx.EUR.toFixed(2); });
 
-  // Re-run currency converter with updated rates
+  // JHB time
+  const jhb = new Date().toLocaleTimeString('en-ZA', {timeZone:'Africa/Johannesburg', hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  ['t-time','t-time2'].forEach(id => { const el=$(id); if(el) el.textContent = jhb; });
+
+  // update converter quietly
   runConverter();
 }
 
-/* ── ANIMATED COUNTERS ───────────────────────────────────────── */
-function animateCounter(el, target, duration = 1800) {
-  const suffix = el.nextElementSibling?.classList.contains('stat-suf') ? '' : '';
-  const start = performance.now();
-  const startVal = 0;
-
-  function tick(now) {
-    const elapsed = now - start;
-    const progress = clamp(elapsed / duration, 0, 1);
-    const eased = 1 - Math.pow(1 - progress, 3);
-    const current = Math.round(lerp(startVal, target, eased));
-    el.textContent = current.toLocaleString('en-ZA');
-    if (progress < 1) requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
+/* ── COUNTERS ────────────────────────────────────────────── */
+function countUp(el, target, dur=1800) {
+  const t0 = performance.now();
+  (function tick(now) {
+    const p = clamp((now-t0)/dur, 0, 1);
+    const e = 1 - Math.pow(1-p, 3);
+    el.textContent = Math.round(lerp(0, target, e)).toLocaleString('en-ZA');
+    if (p < 1) requestAnimationFrame(tick);
+  })(t0);
 }
 
 function initCounters() {
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const el = entry.target;
-        const target = parseFloat(el.dataset.target);
-        animateCounter(el, target);
-        observer.unobserve(el);
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (en.isIntersecting) {
+        const el = en.target;
+        countUp(el, +el.dataset.count);
+        io.unobserve(el);
       }
     });
-  }, { threshold: 0.5 });
-
-  $$('.stat-num').forEach(el => observer.observe(el));
+  }, { threshold:.5 });
+  $$('[data-count]').forEach(el => io.observe(el));
 }
 
-/* ── TYPING CODE ANIMATION ───────────────────────────────────── */
-const CODE_LINES = [
-  '<span class="cm"># DevCraft automation engine</span>',
-  '<span class="kw">import</span> pandas <span class="kw">as</span> pd',
-  '<span class="kw">import</span> schedule, requests',
-  '',
-  '<span class="kw">def</span> <span class="fn">sync_inventory</span>():',
-  '    df = pd.read_excel(<span class="str">"stock.xlsx"</span>)',
-  '    low = df[df[<span class="str">"qty"</span>] < <span class="num">10</span>]',
-  '    <span class="fn">send_alert</span>(low.to_dict())',
-  '    <span class="fn">update_dashboard</span>(df)',
-  '',
-  '<span class="cm"># Run every morning at 08:00</span>',
-  'schedule.every().day.at(<span class="str">"08:00"</span>)',
-  '        .do(<span class="fn">sync_inventory</span>)',
-  '',
-  '<span class="kw">while</span> <span class="num">True</span>:',
-  '    schedule.run_pending() <span class="cm">▌</span>',
+/* ── TYPING ANIMATION ────────────────────────────────────── */
+const CODE = [
+  ['cm','# DevCraft Studio — automation engine'],
+  ['',''],
+  ['kw','import'], ['',' pandas '], ['kw','as'], ['',' pd'],
+  ['',''],
+  ['kw','import'], ['',' schedule, smtplib'],
+  ['',''],
+  ['cm','# --- core job ---'],
+  ['kw','def'], ['',' '], ['fn','sync_inventory'], ['','():'],
+  ['',"    df = pd.read_excel("], ['str','"stock.xlsx"'], ['',')\n'],
+  ['','    low = df[df['], ['str','"qty"'], ['',']\n'],
+  ['','          < '], ['num','10'], ['',']\n'],
+  ['','    '], ['fn','send_alert'], ['','(low)\n'],
+  ['','    '], ['fn','push_dashboard'], ['','(df)\n'],
+  ['',''],
+  ['cm','# run every weekday at 07:30'],
+  ['','schedule.every().monday_to_friday'],
+  ['','         .at('], ['str','"07:30"'], ['',')'],
+  ['','         .do('], ['fn','sync_inventory'], ['',')'],
+  ['',''],
+  ['kw','while'], ['',' '], ['num','True'], ['',':\n'],
+  ['','    schedule.run_pending()'],
 ];
 
 function initTyping() {
-  const el = $('#typingCode');
-  if (!el) return;
+  const pre = $('#termCode');
+  if (!pre) return;
 
-  let lineIdx = 0, charIdx = 0;
-  let html = '';
+  // flatten to a sequence of {cls, chars[]}
+  const segments = [];
+  for (const [cls, text] of CODE) {
+    if (!text) continue;
+    segments.push({ cls, text });
+  }
 
-  function typeNext() {
-    if (lineIdx >= CODE_LINES.length) return;
+  let si = 0, ci = 0;
+  let rendered = '';
 
-    const line = CODE_LINES[lineIdx];
+  function rebuild() {
+    // Build current partial display
+    let out = rendered;
+    if (si < segments.length) {
+      const seg = segments[si];
+      const partial = seg.text.slice(0, ci);
+      if (seg.cls) out += `<span class="tc-${seg.cls}">${esc(partial)}</span>`;
+      else         out += esc(partial);
+    }
+    pre.innerHTML = out + '<span class="tc-cursor">▌</span>';
+  }
 
-    // Strip tags for typing — we'll inject the full tagged line at once
-    if (charIdx === 0 && line === '') {
-      html += '\n';
-      el.innerHTML = html + '<span class="cm">▌</span>';
-      lineIdx++;
-      setTimeout(typeNext, 120);
+  function esc(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function step() {
+    if (si >= segments.length) return; // done
+
+    const seg = segments[si];
+    ci++;
+
+    if (ci > seg.text.length) {
+      // commit this segment
+      if (seg.cls) rendered += `<span class="tc-${seg.cls}">${esc(seg.text)}</span>`;
+      else         rendered += esc(seg.text);
+      si++; ci = 0;
+      rebuild();
+      setTimeout(step, seg.text.endsWith('\n') ? 120 : 60);
       return;
     }
 
-    // Type the full HTML line character by character using text length
-    const stripped = line.replace(/<[^>]+>/g, '');
-    charIdx++;
-    if (charIdx >= stripped.length + 1) {
-      html += line + '\n';
-      el.innerHTML = html + '<span class="cm">▌</span>';
-      lineIdx++;
-      charIdx = 0;
-      setTimeout(typeNext, 150);
-    } else {
-      // partial approach: type the whole line at once for simplicity (HTML tags complicate partial typing)
-      const partial = stripped.slice(0, charIdx);
-      el.innerHTML = html + partial + '<span class="cm">▌</span>';
-      setTimeout(typeNext, 30);
-    }
+    rebuild();
+    setTimeout(step, seg.cls === 'cm' ? 18 : 28);
   }
 
-  setTimeout(typeNext, 800);
+  setTimeout(step, 600);
 }
 
-/* ── SERVICES CAROUSEL ───────────────────────────────────────── */
+/* ── SERVICES ────────────────────────────────────────────── */
 function renderServices() {
-  const track = $('#servicesTrack');
-  const dotsEl = $('#srvDots');
-  if (!track) return;
-
-  track.innerHTML = SERVICES.map((s, i) => `
-    <article class="service-card fade-up" style="transition-delay:${i * 0.07}s">
-      <div class="sc-num">0${i + 1}</div>
-      <span class="sc-icon">${s.icon}</span>
+  const grid = $('#srvGrid');
+  if (!grid) return;
+  grid.innerHTML = SERVICES.map((s, i) => `
+    <article class="srv-card reveal">
+      <div class="sc-idx">${String(i+1).padStart(2,'0')} / ${String(SERVICES.length).padStart(2,'0')}</div>
+      <span class="sc-emoji">${s.emoji}</span>
       <h3 class="sc-title">${s.title}</h3>
       <p class="sc-desc">${s.desc}</p>
       <span class="sc-tag">${s.tag}</span>
     </article>
   `).join('');
+  initReveal();
+}
 
-  // Dots
-  if (dotsEl) {
-    dotsEl.innerHTML = SERVICES.map((_, i) => `<button class="s-dot${i === 0 ? ' active' : ''}" data-i="${i}" aria-label="Go to slide ${i + 1}"></button>`).join('');
-    dotsEl.addEventListener('click', e => {
-      const btn = e.target.closest('.s-dot');
-      if (btn) scrollToService(parseInt(btn.dataset.i));
-    });
-  }
-
-  // Drag scroll
-  let isDown = false, startX, scrollL;
-  track.addEventListener('mousedown', e => { isDown = true; startX = e.pageX - track.offsetLeft; scrollL = track.scrollLeft; track.style.cursor = 'grabbing'; });
-  track.addEventListener('mouseleave', () => { isDown = false; track.style.cursor = 'grab'; });
-  track.addEventListener('mouseup', () => { isDown = false; track.style.cursor = 'grab'; });
-  track.addEventListener('mousemove', e => {
-    if (!isDown) return;
-    e.preventDefault();
-    const x = e.pageX - track.offsetLeft;
-    track.scrollLeft = scrollL - (x - startX) * 1.5;
-  });
-
-  // Arrow buttons
-  $('#srvPrev')?.addEventListener('click', () => scrollToService(state.serviceIndex - 1));
-  $('#srvNext')?.addEventListener('click', () => scrollToService(state.serviceIndex + 1));
-
-  track.addEventListener('scroll', () => {
-    const cardWidth = track.querySelector('.service-card')?.offsetWidth + 19 || 300;
-    state.serviceIndex = Math.round(track.scrollLeft / cardWidth);
-    $$('.s-dot').forEach((d, i) => d.classList.toggle('active', i === state.serviceIndex));
+/* ── QUOTES ──────────────────────────────────────────────── */
+function renderQuoteDots() {
+  const d = $('#qDots');
+  if (!d) return;
+  d.innerHTML = TESTIMONIALS.map((_,i) =>
+    `<span class="q-dot${i===0?' on':''}" data-q="${i}"></span>`
+  ).join('');
+  d.addEventListener('click', e => {
+    const btn = e.target.closest('.q-dot');
+    if (btn) showQuote(+btn.dataset.q);
   });
 }
 
-function scrollToService(idx) {
-  const track = $('#servicesTrack');
-  if (!track) return;
-  const cards = $$('.service-card', track);
-  state.serviceIndex = clamp(idx, 0, cards.length - 1);
-  cards[state.serviceIndex]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-  $$('.s-dot').forEach((d, i) => d.classList.toggle('active', i === state.serviceIndex));
+function showQuote(idx) {
+  S.quoteIdx = idx;
+  const qt = $('#qText');
+  const qw = $('#qWho');
+  if (qt) qt.textContent = TESTIMONIALS[idx].text;
+  if (qw) qw.textContent = TESTIMONIALS[idx].who;
+  $$('.q-dot').forEach((d,i) => d.classList.toggle('on', i===idx));
 }
 
-/* ── KPI DASHBOARD ───────────────────────────────────────────── */
-const INDUSTRY_MULTIPLIERS = {
-  retail:    { hours: 1.0, errors: 1.0, speed: 1.0 },
-  logistics: { hours: 1.4, errors: 0.85, speed: 1.2 },
-  finance:   { hours: 0.75, errors: 1.35, speed: 0.9 }
-};
-
-function updateKpis(value) {
-  const level = Number(value);
-  const m = INDUSTRY_MULTIPLIERS[state.industry];
-  const hours = Math.round((level / 100) * 40 * m.hours);
-  const errors = Math.round((level / 100) * 70 * m.errors);
-  const speed = (1 + (level / 100) * m.speed).toFixed(1);
-
-  animKpi('kpiHours', hours);
-  animKpi('kpiErrors', errors);
-  $('#kpiSpeed').textContent = speed;
-  $('#rangeVal').textContent = level + '%';
-
-  drawSparkline('spark1', hours, 40, '#00ffe0');
-  drawSparkline('spark2', errors, 70, '#ff3cac');
-  drawSparkline('spark3', parseFloat(speed), 2, '#f5c518');
-  drawBarChart(level);
+function initQuotes() {
+  renderQuoteDots();
+  // auto-rotate
+  setInterval(() => showQuote((S.quoteIdx+1) % TESTIMONIALS.length), 5000);
 }
 
-function animKpi(id, target) {
-  const el = $('#' + id);
+/* ── KPI DASHBOARD ───────────────────────────────────────── */
+function kpiVal(level) {
+  const m = IND_MUL[S.industry];
+  return {
+    h: Math.round((level/100)*40*m.h),
+    e: Math.round((level/100)*70*m.e),
+    s: (1+(level/100)*m.s).toFixed(1),
+  };
+}
+
+function animKpi(id, to) {
+  const el = $(id);
   if (!el) return;
-  const start = parseFloat(el.textContent) || 0;
-  const dur = 400;
+  const from = parseFloat(el.textContent)||0;
   const t0 = performance.now();
-  function tick(now) {
-    const p = clamp((now - t0) / dur, 0, 1);
-    el.textContent = Math.round(lerp(start, target, p));
-    if (p < 1) requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
+  (function t(now) {
+    const p = clamp((now-t0)/350, 0, 1);
+    el.textContent = parseFloat(lerp(from,to,p)).toFixed(to%1?1:0);
+    if(p<1) requestAnimationFrame(t);
+  })(t0);
 }
 
-function drawSparkline(id, val, max, color) {
-  const el = $('#' + id);
-  if (!el) return;
-  const pts = 12;
-  const ratio = val / max;
-  const data = Array.from({ length: pts }, (_, i) => {
-    const noise = (Math.random() - 0.5) * 0.3;
-    return clamp((i / pts) * ratio + noise, 0, 1);
+function sparkline(id, ratio, color) {
+  const svg = $(id);
+  if (!svg) return;
+  const N = 14;
+  const pts = Array.from({length:N}, (_,i) => {
+    const noise = (Math.random()-.5)*.3;
+    return clamp((i/(N-1))*ratio+noise, 0, 1);
   });
-  data[pts - 1] = ratio;
+  pts[N-1] = ratio;
 
-  const w = el.offsetWidth || 200;
-  const h = 40;
-  const step = w / (pts - 1);
-  const points = data.map((v, i) => `${i * step},${h - v * h}`).join(' ');
-
-  el.innerHTML = `<svg width="100%" height="${h}" preserveAspectRatio="none" viewBox="0 0 ${w} ${h}">
-    <polyline points="${points}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round"/>
-    <polyline points="0,${h} ${points} ${w},${h}" fill="${color}" fill-opacity="0.12" stroke="none"/>
-  </svg>`;
+  const W=120, H=40;
+  const coords = pts.map((v,i) => `${(i/(N-1))*W},${H - v*H}`).join(' ');
+  svg.innerHTML = `
+    <polyline points="${coords}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round"/>
+    <polyline points="0,${H} ${coords} ${W},${H}" fill="${color}" fill-opacity="0.12" stroke="none"/>
+  `;
 }
 
-function drawBarChart(level) {
+function drawBar(level) {
   const canvas = $('#barChart');
-  if (!canvas || !canvas.getContext) return;
+  if (!canvas||!canvas.getContext) return;
   const ctx = canvas.getContext('2d');
-  const w = canvas.offsetWidth;
-  canvas.width = w;
-  canvas.height = 100;
+  const W = canvas.offsetWidth || 400;
+  canvas.width  = W * window.devicePixelRatio;
+  canvas.height = 110 * window.devicePixelRatio;
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
-  const isDark = state.theme === 'dark';
-  const categories = ['Manual', 'Scripted', 'Semi-Auto', 'Fully Auto'];
-  const values = [100, Math.round(100 - level * 0.3), Math.round(100 - level * 0.6), Math.round(100 - level * 0.9)];
-  const barW = (w / categories.length) * 0.55;
-  const gap = (w / categories.length);
+  const isDark = S.theme === 'dark';
+  const accentCol = isDark ? '#c8ff00' : '#1a0aff';
+  const mutedCol  = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)';
+  const textCol   = isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.4)';
 
-  ctx.clearRect(0, 0, w, 100);
+  const cats = ['Manual','Scripted','Semi-Auto','Full Auto'];
+  const vals = [100, Math.round(100-level*.3), Math.round(100-level*.6), Math.round(100-level*.9)];
+  const bW = (W/cats.length)*.55;
+  const gap = W/cats.length;
+  const activeIdx = Math.min(3, Math.floor(level/33));
 
-  categories.forEach((cat, i) => {
-    const x = i * gap + gap * 0.225;
-    const barH = (values[i] / 100) * 70;
-    const y = 70 - barH;
-    const active = i === Math.min(3, Math.floor(level / 33));
+  ctx.clearRect(0,0,W,110);
 
-    // Bar
-    const grad = ctx.createLinearGradient(0, y, 0, 70);
-    if (active) {
-      grad.addColorStop(0, isDark ? '#00ffe0' : '#0066ff');
-      grad.addColorStop(1, isDark ? 'rgba(0,255,224,0.3)' : 'rgba(0,102,255,0.3)');
+  cats.forEach((cat,i) => {
+    const x = i*gap + gap*.225;
+    const barH = (vals[i]/100)*72;
+    const y = 72 - barH;
+
+    const g = ctx.createLinearGradient(0,y,0,72);
+    if (i===activeIdx) {
+      g.addColorStop(0, accentCol);
+      g.addColorStop(1, accentCol+'44');
     } else {
-      grad.addColorStop(0, isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)');
-      grad.addColorStop(1, isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)');
+      g.addColorStop(0, mutedCol);
+      g.addColorStop(1, mutedCol.replace('.12','.04').replace('.1','.04'));
     }
-    ctx.fillStyle = grad;
+    ctx.fillStyle = g;
     ctx.beginPath();
-    ctx.roundRect(x, y, barW, barH, 3);
+    if (ctx.roundRect) ctx.roundRect(x, y, bW, barH, 3);
+    else ctx.rect(x, y, bW, barH);
     ctx.fill();
 
-    // Label
-    ctx.fillStyle = isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.4)';
-    ctx.font = '9px Space Mono, monospace';
+    ctx.fillStyle = textCol;
+    ctx.font = `9px JetBrains Mono, monospace`;
     ctx.textAlign = 'center';
-    ctx.fillText(cat, x + barW / 2, 90);
-    ctx.fillText(values[i] + '%', x + barW / 2, y - 4);
+    ctx.fillText(cat, x+bW/2, 95);
+    ctx.fillStyle = i===activeIdx ? accentCol : textCol;
+    ctx.fillText(vals[i]+'%', x+bW/2, y-4);
   });
 }
 
-/* ── CURRENCY CONVERTER ──────────────────────────────────────── */
+function updateKpis(level) {
+  const v = kpiVal(level);
+  animKpi('#kv0', v.h);
+  animKpi('#kv1', v.e);
+  animKpi('#kv2', parseFloat(v.s));
+  $('#autoVal').textContent = level+'%';
+
+  const isDark = S.theme === 'dark';
+  sparkline('#sp0', v.h/40,          isDark?'#c8ff00':'#1a0aff');
+  sparkline('#sp1', v.e/70,          isDark?'#ff4060':'#d4001a');
+  sparkline('#sp2', parseFloat(v.s)/2, isDark?'#ffcc00':'#b8860b');
+
+  drawBar(level);
+}
+
+function initDashboard() {
+  const slider = $('#autoRange');
+  if (!slider) return;
+  slider.addEventListener('input', e => updateKpis(+e.target.value));
+  updateKpis(45);
+
+  // segments
+  $$('.seg').forEach(btn => {
+    btn.addEventListener('click', () => {
+      $$('.seg').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      S.industry = btn.dataset.ind;
+      updateKpis(+slider.value);
+    });
+  });
+
+  window.addEventListener('resize', () => drawBar(+slider.value));
+}
+
+/* ── CURRENCY ────────────────────────────────────────────── */
 function runConverter() {
-  const amount = parseFloat($('#convAmount')?.value) || 0;
-  const from = $('#convFrom')?.value;
-  const to = $('#convTo')?.value;
-  if (!from || !to) return;
+  const amt  = parseFloat($('#cAmt')?.value)||0;
+  const from = $('#cFrom')?.value;
+  const to   = $('#cTo')?.value;
+  if (!from||!to) return;
 
-  const zarAmount = from === 'ZAR' ? amount : amount * state.fxRates[from];
-  const result = to === 'ZAR' ? zarAmount : zarAmount / state.fxRates[to];
+  const zarAmt = from==='ZAR' ? amt : amt*S.fx[from];
+  const result = to==='ZAR'   ? zarAmt : zarAmt/S.fx[to];
 
-  const resultEl = $('#convResult');
-  if (resultEl) resultEl.value = result.toFixed(2);
+  const res = $('#cRes');
+  if (res) res.value = result.toFixed(2);
 
-  const rateEl = $('#convRateText');
-  const rate = from === to ? 1 : (zarAmount / amount) / (to === 'ZAR' ? 1 : state.fxRates[to]);
-  if (rateEl) rateEl.textContent = `1 ${from} = ${(from === to ? 1 : result / amount).toFixed(4)} ${to} · Updated live`;
+  const rt = $('#cRate');
+  if (rt) {
+    const factor = from===to ? 1 : result/amt;
+    rt.textContent = `1 ${from} = ${factor.toFixed(4)} ${to} · refreshes live`;
+  }
 }
 
 function initConverter() {
-  ['convAmount', 'convFrom', 'convTo'].forEach(id => {
-    $('#' + id)?.addEventListener('input', runConverter);
+  ['cAmt','cFrom','cTo'].forEach(id => {
+    $(id)?.addEventListener('input', runConverter);
   });
-
   $('#swapBtn')?.addEventListener('click', () => {
-    const fromEl = $('#convFrom');
-    const toEl = $('#convTo');
-    const tmp = fromEl.value;
-    fromEl.value = toEl.value;
-    toEl.value = tmp;
+    const a=$('#cFrom'), b=$('#cTo'), t=a.value;
+    a.value=b.value; b.value=t;
     runConverter();
   });
-
   runConverter();
 }
 
-/* ── ROI CALCULATOR ──────────────────────────────────────────── */
+/* ── ROI ─────────────────────────────────────────────────── */
 function updateROI() {
-  const hours = parseInt($('#roiHours')?.value) || 0;
-  const team = parseInt($('#roiTeam')?.value) || 0;
-  const rate = parseInt($('#roiRate')?.value) || 0;
-  const monthly = hours * team * rate * 4.33;
-
-  $('#roiHoursVal').textContent = hours + 'h';
-  $('#roiTeamVal').textContent = team;
-  $('#roiRateVal').textContent = 'R' + rate;
-  $('#roiResult').textContent = 'R' + Math.round(monthly).toLocaleString('en-ZA');
+  const h = +$('#rH').value;
+  const t = +$('#rT').value;
+  const r = +$('#rR').value;
+  const monthly = h*t*r*4.33;
+  $('#rvH').textContent = h+'h';
+  $('#rvT').textContent = t;
+  $('#rvR').textContent = 'R'+r;
+  $('#roiBig').textContent = 'R'+Math.round(monthly).toLocaleString('en-ZA');
 }
 
 function initROI() {
-  ['roiHours', 'roiTeam', 'roiRate'].forEach(id => {
-    $('#' + id)?.addEventListener('input', updateROI);
-  });
+  ['rH','rT','rR'].forEach(id => $(id)?.addEventListener('input', updateROI));
   updateROI();
 }
 
-/* ── WORLD CLOCK ─────────────────────────────────────────────── */
+/* ── CLOCKS ──────────────────────────────────────────────── */
 function renderClocks() {
-  const grid = $('#clockGrid');
-  if (!grid) return;
-  grid.innerHTML = WORLD_CLOCKS.map(c => `
-    <div class="clock-city">
-      <div class="clock-name">${c.city}</div>
-      <div class="clock-time" data-tz="${c.tz}">--:--</div>
-      <div class="clock-tz">${c.tz.split('/')[1] || c.tz}</div>
+  const g = $('#clocksGrid');
+  if (!g) return;
+  g.innerHTML = CLOCKS.map(c=>`
+    <div class="clock-item">
+      <div class="clock-city">${c.city}</div>
+      <div class="clock-time" data-tz="${c.tz}">--:--:--</div>
+      <div class="clock-tz">${c.tz.split('/')[1]||c.tz}</div>
     </div>
   `).join('');
 }
@@ -437,284 +513,163 @@ function renderClocks() {
 function tickClocks() {
   const now = new Date();
   $$('.clock-time').forEach(el => {
-    const tz = el.dataset.tz;
     try {
-      el.textContent = now.toLocaleTimeString('en-ZA', { timeZone: tz, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    } catch { el.textContent = '--:--'; }
+      el.textContent = now.toLocaleTimeString('en-ZA', {timeZone:el.dataset.tz, hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    } catch { el.textContent='--:--'; }
   });
 }
 
-/* ── NEWS FEED ───────────────────────────────────────────────── */
-async function fetchNews(country = '') {
-  const list = $('#newsList');
-  if (!list) return;
-  list.innerHTML = '<p style="color:var(--muted);padding:1rem;grid-column:1/-1;font-family:var(--font-mono);font-size:0.8rem;">Fetching latest stories...</p>';
-
+/* ── NEWS ────────────────────────────────────────────────── */
+async function fetchNews(country='') {
+  const g = $('#newsGrid');
+  if (!g) return;
+  g.innerHTML = `<p style="color:var(--muted);font-family:var(--f-mono);font-size:.8rem;padding:1rem;grid-column:1/-1;">Loading feed…</p>`;
   try {
-    const res = await fetch('https://hnrss.org/frontpage.jsonfeed');
+    const res  = await fetch('https://hnrss.org/frontpage.jsonfeed');
     const feed = await res.json();
-    const items = (feed.items || []).slice(0, 9);
-
-    list.innerHTML = items.map((item, i) => `
-      <article class="news-item fade-up" style="transition-delay:${i * 0.06}s">
-        <span class="news-meta">HN · ${new Date(item.date_published || Date.now()).toLocaleDateString('en-ZA', { month: 'short', day: 'numeric' })}</span>
-        <h3>${item.title || 'Untitled'}</h3>
-        <p>${country ? `Trending with developers in ${country}.` : 'Global developer headline.'}</p>
-        <a class="news-link" href="${item.url || item.external_url || '#'}" target="_blank" rel="noopener noreferrer">
-          Read Story <span>→</span>
-        </a>
+    const items = (feed.items||[]).slice(0,9);
+    g.innerHTML = items.map((item,i)=>`
+      <article class="news-card reveal" style="transition-delay:${i*.05}s">
+        <span class="nc-meta">HN · ${new Date(item.date_published||Date.now()).toLocaleDateString('en-ZA',{month:'short',day:'numeric'})}</span>
+        <h3 class="nc-title">${item.title||'Untitled'}</h3>
+        <p class="nc-sub">${country?`Trending with developers in ${country}.`:'Global developer headline.'}</p>
+        <a class="nc-link" href="${item.url||'#'}" target="_blank" rel="noopener noreferrer">Read story →</a>
       </article>
     `).join('');
-
-    // Trigger fade-up for new items
-    requestAnimationFrame(() => $$('.news-item').forEach(el => el.classList.add('visible')));
-
+    // re-trigger reveal for new nodes
+    setTimeout(initReveal, 50);
   } catch {
-    list.innerHTML = '<p style="color:var(--muted);padding:1rem;grid-column:1/-1;font-family:var(--font-mono);">Could not load live news. Check your connection.</p>';
+    g.innerHTML = `<p style="color:var(--muted);font-family:var(--f-mono);font-size:.8rem;padding:1rem;grid-column:1/-1;">Feed unavailable. Check your connection or try refreshing.</p>`;
   }
 }
 
 async function geoNews() {
-  const locEl = $('#locationInfo');
-  if (!locEl) return;
-
-  if (!('geolocation' in navigator)) {
-    locEl.textContent = 'Showing global tech feed.';
-    fetchNews();
-    return;
-  }
-
+  const loc = $('#newsLoc');
+  if (!loc) return;
+  if (!('geolocation' in navigator)) { loc.textContent='Showing global tech feed.'; fetchNews(); return; }
   navigator.geolocation.getCurrentPosition(
     async pos => {
       try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
-        const data = await res.json();
-        const country = data.address?.country || 'your region';
-        locEl.textContent = `Showing stories popular with developers in ${country}.`;
-        $('#newsEyebrow').textContent = `HN Feed · ${country}`;
+        const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
+        const d = await r.json();
+        const country = d.address?.country||'your region';
+        loc.textContent = `Developer headlines · ${country}`;
         fetchNews(country);
-      } catch {
-        locEl.textContent = 'Showing global feed.';
-        fetchNews();
-      }
+      } catch { loc.textContent='Global tech feed.'; fetchNews(); }
     },
-    () => { locEl.textContent = 'Location denied · Global feed.'; fetchNews(); },
-    { timeout: 6000 }
+    () => { loc.textContent='Global tech feed.'; fetchNews(); },
+    { timeout:6000 }
   );
 }
 
-/* ── MODALS ──────────────────────────────────────────────────── */
-window.openModal = function (id) {
-  const m = $('#' + id);
+/* ── MODALS ──────────────────────────────────────────────── */
+window.openModal = function(id) {
+  const m = $(`#${id}`);
   if (!m) return;
-  m.classList.add('active');
+  m.classList.add('open');
   document.body.style.overflow = 'hidden';
 };
-
-window.closeModal = function (id) {
-  const m = $('#' + id);
+window.closeModal = function(id) {
+  const m = $(`#${id}`);
   if (!m) return;
-  m.classList.remove('active');
+  m.classList.remove('open');
   document.body.style.overflow = '';
 };
-
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    $$('.modal.active').forEach(m => {
-      m.classList.remove('active');
-      document.body.style.overflow = '';
-    });
+  if (e.key==='Escape') {
+    $$('.modal.open').forEach(m=>{ m.classList.remove('open'); document.body.style.overflow=''; });
   }
 });
 
-/* ── CONTACT FORM ────────────────────────────────────────────── */
-function initForms() {
-  // Welcome modal personalization
-  $('#userInputForm')?.addEventListener('submit', e => {
+/* ── CONTACT FORM ────────────────────────────────────────── */
+function initContactForm() {
+  const form = $('#contactForm');
+  if (!form) return;
+  form.addEventListener('submit', e => {
     e.preventDefault();
-    const val = $('#userInput')?.value?.trim();
-    if (val) personalize(val);
-    closeModal('welcomeModal');
-  });
-
-  // Contact form
-  $('#contactForm')?.addEventListener('submit', e => {
-    e.preventDefault();
-    const statusEl = $('#formStatus');
-    if (statusEl) {
-      statusEl.textContent = '✓ Proposal request sent! I'll reply within 24 hours.';
-      statusEl.style.color = 'var(--green)';
-    }
-    setTimeout(() => {
-      $('#contactForm').reset();
-      if (statusEl) statusEl.textContent = '';
-      closeModal('contactModal');
-    }, 2500);
+    const s = $('#mStatus');
+    if (s) { s.textContent='✓ Sent! I\'ll reply within 24 hours.'; s.style.color='var(--green)'; }
+    setTimeout(()=>{ form.reset(); if(s) s.textContent=''; closeModal('contactModal'); }, 2800);
   });
 }
 
-function personalize(input) {
-  const kw = input.toLowerCase();
-  const matching = SERVICES.filter(s => s.tag.includes(kw) || s.title.toLowerCase().includes(kw));
-  if (matching.length > 0) {
-    const idx = SERVICES.findIndex(s => s === matching[0]);
-    if (idx >= 0) setTimeout(() => scrollToService(idx), 500);
-  }
-
-  const msg = $('#message');
-  if (msg) msg.value = `Hi, I'm interested in solutions related to "${input}". Please share next steps.`;
-}
-
-/* ── NAVBAR SCROLL ───────────────────────────────────────────── */
-function initNavbar() {
-  const nav = $('#navbar');
-  const fCta = $('#floatingCta');
-  let lastY = 0;
+/* ── NAV ─────────────────────────────────────────────────── */
+function initNav() {
+  const nav = $('#mainNav');
+  const fab = $('#fab');
 
   window.addEventListener('scroll', () => {
     const y = window.scrollY;
-    nav.classList.toggle('scrolled', y > 60);
-    fCta.classList.toggle('visible', y > 400);
-    lastY = y;
+    nav?.classList.toggle('scrolled', y>60);
+    fab?.classList.toggle('show', y>400);
+  }, { passive:true });
+
+  $('#burger')?.addEventListener('click', () => {
+    $('#navLinks')?.classList.toggle('open');
   });
 
-  // Hamburger
-  $('#menuToggle')?.addEventListener('click', () => {
-    const nl = $('#navLinks');
-    nl.classList.toggle('open');
-  });
+  // close mobile nav on link click
+  $$('.nl').forEach(a => a.addEventListener('click', () => {
+    $('#navLinks')?.classList.remove('open');
+  }));
 
-  // Active nav links on scroll
-  const sections = $$('section[id]');
-  const navLinks = $$('.nav-link');
-
+  // active link tracking
   const io = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const id = entry.target.id;
-        navLinks.forEach(l => l.classList.toggle('active', l.dataset.section === id));
+    entries.forEach(en => {
+      if (en.isIntersecting) {
+        const id = en.target.id;
+        $$('.nl').forEach(l => l.classList.toggle('active', l.dataset.sec===id));
       }
     });
-  }, { rootMargin: '-40% 0px -55% 0px' });
-
-  sections.forEach(s => io.observe(s));
+  }, { rootMargin:'-40% 0px -55% 0px' });
+  $$('section[id]').forEach(s=>io.observe(s));
 }
 
-/* ── SCROLL FADE ─────────────────────────────────────────────── */
-function initScrollFade() {
+/* ── SCROLL REVEAL ───────────────────────────────────────── */
+function initReveal() {
   const io = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add('visible');
-        io.unobserve(e.target);
-      }
+    entries.forEach(en => {
+      if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
     });
-  }, { threshold: 0.12 });
-  $$('.fade-up').forEach(el => io.observe(el));
+  }, { threshold:.1 });
+  $$('.reveal').forEach(el => { if (!el.classList.contains('in')) io.observe(el); });
 }
 
-/* ── SECTION REACTIVE BG ─────────────────────────────────────── */
-function initSectionReactivity() {
-  const orb1 = $('.orb-1');
-  const orb2 = $('.orb-2');
-  if (!orb1 || !orb2) return;
-
-  const colorMap = {
-    home:      ['rgba(0,255,224,0.18)', 'rgba(255,60,172,0.15)'],
-    services:  ['rgba(245,197,24,0.18)', 'rgba(0,255,136,0.12)'],
-    portfolio: ['rgba(255,60,172,0.2)',  'rgba(0,255,224,0.1)'],
-    converter: ['rgba(0,102,255,0.18)',  'rgba(245,197,24,0.15)'],
-    news:      ['rgba(0,255,136,0.18)',  'rgba(0,255,224,0.1)'],
-    contact:   ['rgba(245,197,24,0.2)',  'rgba(255,60,172,0.12)'],
-  };
-
-  const io = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        const id = e.target.id;
-        const colors = colorMap[id];
-        if (colors) {
-          orb1.style.background = `radial-gradient(circle, ${colors[0]}, transparent 70%)`;
-          orb2.style.background = `radial-gradient(circle, ${colors[1]}, transparent 70%)`;
-        }
-      }
-    });
-  }, { threshold: 0.3 });
-
-  $$('section[id]').forEach(s => io.observe(s));
+/* ── YEAR ────────────────────────────────────────────────── */
+function setYear() {
+  const el = $('#yr');
+  if (el) el.textContent = new Date().getFullYear();
 }
 
-/* ── INDUSTRY SEGMENTS ───────────────────────────────────────── */
-function initSegments() {
-  $$('.seg').forEach(btn => {
-    btn.addEventListener('click', () => {
-      $$('.seg').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.industry = btn.dataset.industry;
-      updateKpis($('#rangeInput')?.value || 45);
-    });
-  });
-}
-
-/* ── TESTIMONIAL DUPLICATE FOR SEAMLESS LOOP ─────────────────── */
-function initTestimonials() {
-  const track = $('#testimonialTrack');
-  if (!track) return;
-  track.innerHTML += track.innerHTML; // duplicate for seamless scroll
-}
-
-/* ── MAIN INIT ───────────────────────────────────────────────── */
+/* ── INIT ────────────────────────────────────────────────── */
 function init() {
-  // Theme
-  setTheme(state.theme);
-  $('#themeToggle')?.addEventListener('click', () => {
-    toggleTheme();
-    drawBarChart($('#rangeInput')?.value || 45);
-  });
+  setTheme('dark');   // always start dark — no localStorage
+  setYear();
 
-  // Render
-  renderServices();
-  initTyping();
-  initCounters();
-  initForms();
-  initNavbar();
+  // theme toggle
+  $('#themeBtn')?.addEventListener('click', () => { toggleTheme(); });
+
+  initCanvas();
   initCursor();
-  initScrollFade();
-  initSectionReactivity();
-  initSegments();
-  initTestimonials();
-  renderClocks();
+  initCounters();
+  initTyping();
+  renderServices();
+  initDashboard();
   initConverter();
   initROI();
+  renderClocks();
+  initQuotes();
+  initNav();
+  initReveal();
+  initContactForm();
   geoNews();
 
-  // KPI range
-  $('#rangeInput')?.addEventListener('input', e => updateKpis(e.target.value));
-  updateKpis(45);
-
-  // Footer year
-  const yearEl = $('#year');
-  if (yearEl) yearEl.textContent = new Date().getFullYear();
-
-  // Ticker & clock intervals
-  updateTicker();
-  setInterval(updateTicker, 5000);
-  setInterval(tickClocks, 1000);
+  // tickers
+  tickerTick();
+  setInterval(tickerTick, 5000);
   tickClocks();
-
-  // Show welcome modal after slight delay
-  setTimeout(() => openModal('welcomeModal'), 1200);
-
-  // Re-observe fade-up after service render
-  setTimeout(initScrollFade, 300);
-
-  // Redraw chart on resize
-  window.addEventListener('resize', () => drawBarChart($('#rangeInput')?.value || 45));
+  setInterval(tickClocks, 1000);
 }
 
-// Wait for DOM
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init);
-} else {
-  init();
-}
+if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
+else init();
