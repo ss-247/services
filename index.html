@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Custom Web Development Services | Automation, Dashboards & Apps</title>
+    <meta
+      name="description"
+      content="Premium web development and automation services: Python tools, WordPress, dynamic apps, static websites, Excel automation, interactive dashboards, and inventory systems."
+    />
+    <meta
+      name="keywords"
+      content="web development, python automation, wordpress, dashboard, excel automation, inventory management"
+    />
+    <meta name="author" content="Your Name" />
+    <meta property="og:title" content="Custom Web Development Services" />
+    <meta
+      property="og:description"
+      content="Turn workflows into high-performing web apps and automation tools."
+    />
+    <meta property="og:type" content="website" />
+    <meta name="theme-color" content="#0b1f3a" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <script defer src="script.js"></script>
+  </head>
+  <body>
+    <div class="background-glow" aria-hidden="true"></div>
+
+    <div id="welcomeModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-card">
+        <h2 id="modalTitle">Let’s personalize your experience</h2>
+        <p>Tell me your name or what you need most (e.g., automation, dashboard, inventory).</p>
+        <form id="userInputForm">
+          <label for="userInput" class="sr-only">Your name or business keyword</label>
+          <input
+            id="userInput"
+            name="userInput"
+            type="text"
+            maxlength="40"
+            placeholder="Type your name or keyword"
+            required
+          />
+          <button type="submit" class="btn btn-primary">Enter</button>
+        </form>
+      </div>
+    </div>
+
+    <header class="site-header" id="home">
+      <nav class="navbar container">
+        <a href="#home" class="brand">DevCraft<span>Studio</span></a>
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">☰</button>
+        <ul id="navLinks" class="nav-links">
+          <li><a href="#home">Home</a></li>
+          <li><a href="#services">Services</a></li>
+          <li><a href="#portfolio">Portfolio</a></li>
+          <li><a href="#news">News</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+        <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark or light mode">🌓</button>
+      </nav>
+
+      <section class="hero container fade-in">
+        <div class="hero-content">
+          <p class="eyebrow">Limited custom project slots this month</p>
+          <h1 id="heroTitle">Future-Ready Digital Solutions for Growing Teams</h1>
+          <p>
+            I craft automation-first websites, applications, and dashboards that save time,
+            reduce errors, and unlock insight.
+          </p>
+          <div class="hero-actions">
+            <a href="#services" class="btn btn-primary">Explore Services</a>
+            <a href="#contact" class="btn btn-outline">Book a Discovery Call</a>
+          </div>
+        </div>
+
+        <div class="hero-visual tilt-card" id="tiltCard" aria-hidden="true">
+          <svg viewBox="0 0 500 320" class="workflow-svg" role="img" aria-label="Automation workflow illustration">
+            <defs>
+              <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#00c2a8" />
+                <stop offset="100%" stop-color="#f0b429" />
+              </linearGradient>
+            </defs>
+            <rect x="20" y="30" width="120" height="70" rx="12" class="node" />
+            <rect x="190" y="30" width="120" height="70" rx="12" class="node" />
+            <rect x="360" y="30" width="120" height="70" rx="12" class="node" />
+            <rect x="105" y="190" width="120" height="70" rx="12" class="node" />
+            <rect x="275" y="190" width="120" height="70" rx="12" class="node" />
+
+            <path d="M140 65 L190 65" class="flow" />
+            <path d="M310 65 L360 65" class="flow" />
+            <path d="M420 100 L335 190" class="flow" />
+            <path d="M250 100 L165 190" class="flow" />
+            <path d="M225 225 L275 225" class="flow" />
+
+            <text x="44" y="72">Data</text>
+            <text x="206" y="72">Python Bot</text>
+            <text x="372" y="72">Web App</text>
+            <text x="128" y="232">Dashboard</text>
+            <text x="296" y="232">Decisions</text>
+          </svg>
+        </div>
+      </section>
+    </header>
+
+    <main>
+      <section id="services" class="section container fade-in">
+        <h2 id="servicesHeading">Tailored Solutions</h2>
+        <p class="section-subtitle">Handcrafted services for outcomes, not just output.</p>
+        <div class="service-grid" id="serviceGrid"></div>
+      </section>
+
+      <section id="portfolio" class="section section-alt fade-in">
+        <div class="container">
+          <h2>What’s Possible</h2>
+          <p class="section-subtitle">Interactive sample dashboard simulation</p>
+
+          <div class="dashboard-sim">
+            <div class="controls">
+              <label for="rangeInput">Automation Level</label>
+              <input id="rangeInput" type="range" min="0" max="100" value="45" />
+            </div>
+            <div class="sim-kpis">
+              <article>
+                <h3>Hours Saved</h3>
+                <p id="kpiHours">18h/mo</p>
+              </article>
+              <article>
+                <h3>Error Reduction</h3>
+                <p id="kpiErrors">32%</p>
+              </article>
+              <article>
+                <h3>Decision Speed</h3>
+                <p id="kpiSpeed">1.5x</p>
+              </article>
+            </div>
+          </div>
+
+          <div class="testimonials">
+            <article>
+              <p>“Our manual reporting became a live dashboard in two weeks.”</p>
+              <span>— Placeholder Client, Operations Lead</span>
+            </article>
+            <article>
+              <p>“Inventory errors dropped dramatically after automation.”</p>
+              <span>— Placeholder Client, Retail Manager</span>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="news" class="section container fade-in">
+        <h2 id="newsHeading">Tech News Near You</h2>
+        <p id="locationInfo">Detecting location preference...</p>
+        <div id="newsList" class="news-grid" aria-live="polite"></div>
+      </section>
+
+      <section id="contact" class="section fade-in">
+        <div class="container contact-wrap">
+          <div>
+            <h2>Let’s Build Your Competitive Edge</h2>
+            <p>
+              Bring your workflow challenge and get a high-impact plan tailored to your goals.
+            </p>
+          </div>
+          <form id="contactForm" class="contact-form">
+            <label for="name">Name</label>
+            <input id="name" name="name" type="text" required />
+
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" required />
+
+            <label for="message">Project Brief</label>
+            <textarea id="message" name="message" rows="5" required></textarea>
+
+            <button type="submit" class="btn btn-primary">Request Proposal</button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <a href="#contact" id="floatingCta" class="floating-cta">Get Your Custom Site</a>
+
+    <footer class="site-footer">
+      <p>© <span id="year"></span> DevCraftStudio. Crafted for speed, clarity, and growth.</p>
+    </footer>
+  </body>
+</html>
