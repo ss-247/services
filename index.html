@@ -1,194 +1,419 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark" data-section="home">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Custom Web Development Services | Automation, Dashboards & Apps</title>
-    <meta
-      name="description"
-      content="Premium web development and automation services: Python tools, WordPress, dynamic apps, static websites, Excel automation, interactive dashboards, and inventory systems."
-    />
-    <meta
-      name="keywords"
-      content="web development, python automation, wordpress, dashboard, excel automation, inventory management"
-    />
-    <meta name="author" content="Your Name" />
-    <meta property="og:title" content="Custom Web Development Services" />
-    <meta
-      property="og:description"
-      content="Turn workflows into high-performing web apps and automation tools."
-    />
-    <meta property="og:type" content="website" />
-    <meta name="theme-color" content="#0b1f3a" />
+    <title>DevCraft Studio | Automation · Dashboards · Digital Power</title>
+    <meta name="description" content="Premium web development and automation services: Python tools, WordPress, dynamic apps, static websites, Excel automation, interactive dashboards, and inventory systems." />
+    <meta name="theme-color" content="#0a0a0f" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
-    <script defer src="script.js"></script>
   </head>
   <body>
-    <div class="background-glow" aria-hidden="true"></div>
 
-    <div id="welcomeModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <!-- NOISE OVERLAY -->
+    <div class="noise" aria-hidden="true"></div>
+    <div class="orb orb-1" aria-hidden="true"></div>
+    <div class="orb orb-2" aria-hidden="true"></div>
+    <div class="orb orb-3" aria-hidden="true"></div>
+
+    <!-- CURSOR -->
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-trail" id="cursorTrail"></div>
+
+    <!-- TICKER TAPE -->
+    <div class="ticker-wrap" aria-label="Live metrics ticker">
+      <div class="ticker" id="ticker">
+        <span class="tick-item"><span class="tick-label">SITES BUILT</span> <span class="tick-val" id="t-sites">247</span></span>
+        <span class="tick-sep">///</span>
+        <span class="tick-item"><span class="tick-label">HOURS AUTOMATED</span> <span class="tick-val tick-green" id="t-hours">18,420</span></span>
+        <span class="tick-sep">///</span>
+        <span class="tick-item"><span class="tick-label">USD/ZAR</span> <span class="tick-val tick-gold" id="t-usd">18.64</span></span>
+        <span class="tick-sep">///</span>
+        <span class="tick-item"><span class="tick-label">EUR/ZAR</span> <span class="tick-val tick-gold" id="t-eur">20.11</span></span>
+        <span class="tick-sep">///</span>
+        <span class="tick-item"><span class="tick-label">ERRORS ELIMINATED</span> <span class="tick-val tick-green">94.7%</span></span>
+        <span class="tick-sep">///</span>
+        <span class="tick-item"><span class="tick-label">CLIENT UPTIME</span> <span class="tick-val tick-green">99.9%</span></span>
+        <span class="tick-sep">///</span>
+        <span class="tick-item"><span class="tick-label">AUTOMATION ROI</span> <span class="tick-val tick-gold">340%</span></span>
+        <span class="tick-sep">///</span>
+        <span class="tick-item"><span class="tick-label">JHB LOCAL TIME</span> <span class="tick-val" id="t-time">--:--</span></span>
+        <span class="tick-sep">///</span>
+        <!-- repeat for seamless scroll -->
+        <span class="tick-item"><span class="tick-label">SITES BUILT</span> <span class="tick-val">247</span></span>
+        <span class="tick-sep">///</span>
+        <span class="tick-item"><span class="tick-label">HOURS AUTOMATED</span> <span class="tick-val tick-green">18,420</span></span>
+        <span class="tick-sep">///</span>
+        <span class="tick-item"><span class="tick-label">USD/ZAR</span> <span class="tick-val tick-gold" id="t-usd2">18.64</span></span>
+        <span class="tick-sep">///</span>
+        <span class="tick-item"><span class="tick-label">EUR/ZAR</span> <span class="tick-val tick-gold" id="t-eur2">20.11</span></span>
+        <span class="tick-sep">///</span>
+        <span class="tick-item"><span class="tick-label">ERRORS ELIMINATED</span> <span class="tick-val tick-green">94.7%</span></span>
+        <span class="tick-sep">///</span>
+        <span class="tick-item"><span class="tick-label">CLIENT UPTIME</span> <span class="tick-val tick-green">99.9%</span></span>
+        <span class="tick-sep">///</span>
+        <span class="tick-item"><span class="tick-label">AUTOMATION ROI</span> <span class="tick-val tick-gold">340%</span></span>
+        <span class="tick-sep">///</span>
+      </div>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar" id="navbar">
+      <a href="#home" class="brand" id="brandLink">DEV<span>CRAFT</span></a>
+
+      <div class="nav-center" id="navLinks">
+        <a href="#home" class="nav-link" data-section="home">Home</a>
+        <a href="#services" class="nav-link" data-section="services">Services</a>
+        <a href="#portfolio" class="nav-link" data-section="portfolio">Portfolio</a>
+        <a href="#converter" class="nav-link" data-section="converter">Tools</a>
+        <a href="#news" class="nav-link" data-section="news">News</a>
+        <a href="#contact" class="nav-link" data-section="contact">Contact</a>
+      </div>
+
+      <div class="nav-right">
+        <button id="themeToggle" class="icon-btn" aria-label="Toggle theme" title="Toggle light/dark">
+          <span class="theme-icon">◐</span>
+        </button>
+        <button class="btn btn-sm" id="ctaNav" onclick="openModal('contactModal')">Start Project</button>
+        <button class="menu-toggle" id="menuToggle" aria-label="Menu">☰</button>
+      </div>
+    </nav>
+
+    <!-- ═══════════════════════════════ HERO ════════════════════════════════ -->
+    <section id="home" class="section-home">
+      <div class="hero-grid">
+        <div class="hero-left">
+          <div class="hero-badge">
+            <span class="pulse-dot"></span>
+            <span>Available for projects — JHB, ZA</span>
+          </div>
+          <h1 class="hero-headline">
+            <span class="line-reveal" style="--d:0.1s">WE BUILD</span>
+            <span class="line-reveal accent-word" style="--d:0.25s">DIGITAL</span>
+            <span class="line-reveal" style="--d:0.4s">MACHINES</span>
+          </h1>
+          <p class="hero-sub line-reveal" style="--d:0.55s">Automation-first websites. Dashboards that decide. Apps that eliminate error. Built for teams that refuse to stay still.</p>
+          <div class="hero-ctas line-reveal" style="--d:0.7s">
+            <button class="btn btn-primary" onclick="openModal('contactModal')">Get a Proposal ↗</button>
+            <a href="#services" class="btn btn-ghost">See What We Build</a>
+          </div>
+          <div class="hero-stats line-reveal" style="--d:0.85s">
+            <div class="stat-pill">
+              <span class="stat-num" data-target="247">0</span>
+              <span class="stat-label">Projects</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-num" data-target="18420">0</span>
+              <span class="stat-label">Hrs Saved</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-num" data-target="98">0</span><span class="stat-suf">%</span>
+              <span class="stat-label">Satisfaction</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-right">
+          <div class="code-window">
+            <div class="code-titlebar">
+              <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+              <span class="code-filename">automate.py</span>
+            </div>
+            <pre class="code-body" id="typingCode"></pre>
+          </div>
+
+          <div class="floating-chips">
+            <div class="chip chip-1">⚡ Python Bot</div>
+            <div class="chip chip-2">📊 Live Dashboard</div>
+            <div class="chip chip-3">🔗 API Sync</div>
+            <div class="chip chip-4">📦 Inventory AI</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCROLL INDICATOR -->
+      <div class="scroll-prompt" aria-hidden="true">
+        <span>SCROLL</span>
+        <div class="scroll-line"></div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════ SERVICES ════════════════════════════ -->
+    <section id="services" class="section-services">
+      <div class="section-header">
+        <span class="section-eyebrow">What We Craft</span>
+        <h2 class="section-title">Services</h2>
+      </div>
+
+      <div class="services-horizontal" id="servicesTrack">
+        <!-- JS renders cards here -->
+      </div>
+
+      <div class="services-nav">
+        <button class="s-arrow" id="srvPrev" aria-label="Previous">←</button>
+        <div class="s-dots" id="srvDots"></div>
+        <button class="s-arrow" id="srvNext" aria-label="Next">→</button>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════ PORTFOLIO / DASHBOARD SIM ══════════ -->
+    <section id="portfolio" class="section-portfolio">
+      <div class="section-header">
+        <span class="section-eyebrow">Interactive Preview</span>
+        <h2 class="section-title">Your Future Dashboard</h2>
+      </div>
+
+      <div class="portfolio-grid">
+        <div class="dash-controls">
+          <label class="control-label">Automation Level</label>
+          <div class="slider-wrap">
+            <input id="rangeInput" type="range" min="0" max="100" value="45" class="custom-range" />
+            <span id="rangeVal">45%</span>
+          </div>
+
+          <label class="control-label mt">Industry</label>
+          <div class="seg-control" id="segControl">
+            <button class="seg active" data-industry="retail">Retail</button>
+            <button class="seg" data-industry="logistics">Logistics</button>
+            <button class="seg" data-industry="finance">Finance</button>
+          </div>
+        </div>
+
+        <div class="kpi-board">
+          <div class="kpi-card" id="kpi-hours">
+            <div class="kpi-sparkline" id="spark1"></div>
+            <span class="kpi-num" id="kpiHours">18</span><span class="kpi-unit">h/mo</span>
+            <span class="kpi-name">Hours Saved</span>
+          </div>
+          <div class="kpi-card" id="kpi-errors">
+            <div class="kpi-sparkline" id="spark2"></div>
+            <span class="kpi-num" id="kpiErrors">32</span><span class="kpi-unit">%</span>
+            <span class="kpi-name">Error Reduction</span>
+          </div>
+          <div class="kpi-card" id="kpi-speed">
+            <div class="kpi-sparkline" id="spark3"></div>
+            <span class="kpi-num" id="kpiSpeed">1.5</span><span class="kpi-unit">×</span>
+            <span class="kpi-name">Decision Speed</span>
+          </div>
+          <div class="kpi-card full-width">
+            <canvas id="barChart" height="100"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonials-strip">
+        <div class="testimonial-track" id="testimonialTrack">
+          <div class="testimonial-card">
+            <p class="t-quote">"Our manual reporting became a live dashboard in two weeks. I didn't believe it until I saw it."</p>
+            <span class="t-author">— Kagiso M., Operations Lead · Johannesburg</span>
+          </div>
+          <div class="testimonial-card">
+            <p class="t-quote">"Inventory errors dropped from 12% to under 1% after the automation system went live."</p>
+            <span class="t-author">— Priya N., Retail Manager · Sandton</span>
+          </div>
+          <div class="testimonial-card">
+            <p class="t-quote">"The Python bot saves my team 40 hours every single month. Absolutely game-changing."</p>
+            <span class="t-author">— André V., Data Analyst · Cape Town</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════ CONVERTER TOOLS ════════════════════ -->
+    <section id="converter" class="section-converter">
+      <div class="section-header">
+        <span class="section-eyebrow">Live Tools</span>
+        <h2 class="section-title">Your Numbers, Real-Time</h2>
+      </div>
+
+      <div class="tools-grid">
+        <!-- Currency Converter -->
+        <div class="tool-card" id="currencyTool">
+          <div class="tool-header">
+            <span class="tool-icon">💱</span>
+            <h3>Currency Converter</h3>
+            <span class="live-badge">LIVE</span>
+          </div>
+          <div class="converter-body">
+            <div class="conv-row">
+              <input type="number" id="convAmount" value="1000" class="conv-input" />
+              <select id="convFrom" class="conv-select">
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+                <option value="ZAR" selected>ZAR</option>
+              </select>
+            </div>
+            <button class="swap-btn" id="swapBtn" aria-label="Swap currencies">⇅</button>
+            <div class="conv-row">
+              <input type="text" id="convResult" class="conv-input conv-output" readonly />
+              <select id="convTo" class="conv-select">
+                <option value="USD" selected>USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+                <option value="ZAR">ZAR</option>
+              </select>
+            </div>
+            <p class="conv-rate" id="convRateText">Rate: —</p>
+          </div>
+        </div>
+
+        <!-- ROI Calculator -->
+        <div class="tool-card" id="roiTool">
+          <div class="tool-header">
+            <span class="tool-icon">📈</span>
+            <h3>Automation ROI</h3>
+          </div>
+          <div class="roi-body">
+            <label>Hours wasted per week <span class="roi-val" id="roiHoursVal">10</span>h</label>
+            <input type="range" min="1" max="80" value="10" id="roiHours" class="custom-range" />
+            <label>Team size <span class="roi-val" id="roiTeamVal">5</span> people</label>
+            <input type="range" min="1" max="50" value="5" id="roiTeam" class="custom-range" />
+            <label>Avg salary (ZAR/hr) <span class="roi-val" id="roiRateVal">R350</span></label>
+            <input type="range" min="100" max="1500" step="50" value="350" id="roiRate" class="custom-range" />
+            <div class="roi-result">
+              <span class="roi-label">Monthly cost of NOT automating</span>
+              <span class="roi-big" id="roiResult">R56,000</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Time Zone World Clock -->
+        <div class="tool-card" id="clockTool">
+          <div class="tool-header">
+            <span class="tool-icon">🕐</span>
+            <h3>World Clock</h3>
+          </div>
+          <div class="clock-grid" id="clockGrid">
+            <!-- JS fills this -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════ NEWS ════════════════════════════════ -->
+    <section id="news" class="section-news">
+      <div class="section-header">
+        <span class="section-eyebrow" id="newsEyebrow">Hacker News Feed</span>
+        <h2 class="section-title" id="newsHeading">Tech Pulse</h2>
+        <p class="section-sub" id="locationInfo">Loading...</p>
+      </div>
+      <div class="news-masonry" id="newsList" aria-live="polite">
+        <!-- JS fills this -->
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════ CONTACT ══════════════════════════════ -->
+    <section id="contact" class="section-contact">
+      <div class="contact-inner">
+        <div class="contact-left">
+          <span class="section-eyebrow">Let's Work</span>
+          <h2 class="contact-headline">Start a Project</h2>
+          <p>Tell me about your workflow challenge. I'll tell you how to crush it.</p>
+          <div class="contact-perks">
+            <div class="perk">⚡ Fast turnaround</div>
+            <div class="perk">🔒 NDA available</div>
+            <div class="perk">📍 JHB & remote</div>
+            <div class="perk">💬 24hr response</div>
+          </div>
+          <button class="btn btn-primary btn-lg" onclick="openModal('contactModal')">Open Project Form ↗</button>
+        </div>
+        <div class="contact-visual" aria-hidden="true">
+          <div class="contact-ring ring-1"></div>
+          <div class="contact-ring ring-2"></div>
+          <div class="contact-ring ring-3"></div>
+          <div class="contact-center-icon">✉</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════ FOOTER ═══════════════════════════════ -->
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <span class="brand">DEV<span>CRAFT</span></span>
+          <p>Crafted for speed, clarity, and growth.</p>
+        </div>
+        <div class="footer-links">
+          <a href="#home">Home</a>
+          <a href="#services">Services</a>
+          <a href="#portfolio">Portfolio</a>
+          <a href="#contact">Contact</a>
+        </div>
+        <p class="footer-copy">© <span id="year"></span> DevCraftStudio · Built with intention.</p>
+      </div>
+    </footer>
+
+    <!-- FLOATING CTA -->
+    <a href="#contact" id="floatingCta" class="floating-cta" onclick="event.preventDefault(); openModal('contactModal')">
+      <span>Start Project</span>
+      <span class="float-arrow">↗</span>
+    </a>
+
+    <!-- ═══ MODAL: CONTACT ═══════════════════════════════════════════════════ -->
+    <div id="contactModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalContactTitle">
+      <div class="modal-backdrop" onclick="closeModal('contactModal')"></div>
       <div class="modal-card">
-        <h2 id="modalTitle">Let’s personalize your experience</h2>
-        <p>Tell me your name or what you need most (e.g., automation, dashboard, inventory).</p>
-        <form id="userInputForm">
-          <label for="userInput" class="sr-only">Your name or business keyword</label>
-          <input
-            id="userInput"
-            name="userInput"
-            type="text"
-            maxlength="40"
-            placeholder="Type your name or keyword"
-            required
-          />
-          <button type="submit" class="btn btn-primary">Enter</button>
+        <button class="modal-close" onclick="closeModal('contactModal')" aria-label="Close">×</button>
+        <h2 id="modalContactTitle" class="modal-title">Start Your Project</h2>
+        <p class="modal-sub">I'll get back to you within 24 hours.</p>
+        <form id="contactForm" class="contact-form">
+          <div class="form-row">
+            <div class="field">
+              <label for="name">Name</label>
+              <input id="name" name="name" type="text" placeholder="Your name" required />
+            </div>
+            <div class="field">
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" placeholder="you@company.com" required />
+            </div>
+          </div>
+          <div class="field">
+            <label for="service">Service</label>
+            <select id="service" name="service">
+              <option value="">Select a service...</option>
+              <option>Python Automation</option>
+              <option>WordPress Site</option>
+              <option>Dynamic Web App</option>
+              <option>Excel Automation</option>
+              <option>Dashboard Digitization</option>
+              <option>Inventory System</option>
+              <option>Static Website</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="message">Project Brief</label>
+            <textarea id="message" name="message" rows="4" placeholder="Tell me about your workflow challenge..." required></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-full">Send Proposal Request ↗</button>
+          </div>
+          <p class="form-note" id="formStatus"></p>
         </form>
       </div>
     </div>
 
-    <header class="site-header" id="home">
-      <nav class="navbar container">
-        <a href="#home" class="brand">DevCraft<span>Studio</span></a>
-        <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">☰</button>
-        <ul id="navLinks" class="nav-links">
-          <li><a href="#home">Home</a></li>
-          <li><a href="#services">Services</a></li>
-          <li><a href="#portfolio">Portfolio</a></li>
-          <li><a href="#news">News</a></li>
-          <li><a href="#contact">Contact</a></li>
-        </ul>
-        <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark or light mode">🌓</button>
-      </nav>
-
-      <section class="hero container fade-in">
-        <div class="hero-content">
-          <p class="eyebrow">Limited custom project slots this month</p>
-          <h1 id="heroTitle">Future-Ready Digital Solutions for Growing Teams</h1>
-          <p>
-            I craft automation-first websites, applications, and dashboards that save time,
-            reduce errors, and unlock insight.
-          </p>
-          <div class="hero-actions">
-            <a href="#services" class="btn btn-primary">Explore Services</a>
-            <a href="#contact" class="btn btn-outline">Book a Discovery Call</a>
-          </div>
+    <!-- ═══ MODAL: WELCOME ═══════════════════════════════════════════════════ -->
+    <div id="welcomeModal" class="modal modal-welcome" role="dialog" aria-modal="true" aria-labelledby="modalWelcomeTitle">
+      <div class="modal-backdrop" onclick="closeModal('welcomeModal')"></div>
+      <div class="modal-card modal-card-welcome">
+        <div class="welcome-graphic" aria-hidden="true">
+          <div class="wg-ring"></div>
+          <span class="wg-icon">⚡</span>
         </div>
+        <h2 id="modalWelcomeTitle">What brings you here?</h2>
+        <p>Drop a keyword — automation, dashboard, inventory — and I'll tailor this page for you.</p>
+        <form id="userInputForm">
+          <input id="userInput" type="text" maxlength="40" placeholder="Type a keyword or your name..." required />
+          <button type="submit" class="btn btn-primary btn-full">Personalize Experience →</button>
+        </form>
+        <button class="btn-text" onclick="closeModal('welcomeModal')">Skip, explore freely</button>
+      </div>
+    </div>
 
-        <div class="hero-visual tilt-card" id="tiltCard" aria-hidden="true">
-          <svg viewBox="0 0 500 320" class="workflow-svg" role="img" aria-label="Automation workflow illustration">
-            <defs>
-              <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#00c2a8" />
-                <stop offset="100%" stop-color="#f0b429" />
-              </linearGradient>
-            </defs>
-            <rect x="20" y="30" width="120" height="70" rx="12" class="node" />
-            <rect x="190" y="30" width="120" height="70" rx="12" class="node" />
-            <rect x="360" y="30" width="120" height="70" rx="12" class="node" />
-            <rect x="105" y="190" width="120" height="70" rx="12" class="node" />
-            <rect x="275" y="190" width="120" height="70" rx="12" class="node" />
-
-            <path d="M140 65 L190 65" class="flow" />
-            <path d="M310 65 L360 65" class="flow" />
-            <path d="M420 100 L335 190" class="flow" />
-            <path d="M250 100 L165 190" class="flow" />
-            <path d="M225 225 L275 225" class="flow" />
-
-            <text x="44" y="72">Data</text>
-            <text x="206" y="72">Python Bot</text>
-            <text x="372" y="72">Web App</text>
-            <text x="128" y="232">Dashboard</text>
-            <text x="296" y="232">Decisions</text>
-          </svg>
-        </div>
-      </section>
-    </header>
-
-    <main>
-      <section id="services" class="section container fade-in">
-        <h2 id="servicesHeading">Tailored Solutions</h2>
-        <p class="section-subtitle">Handcrafted services for outcomes, not just output.</p>
-        <div class="service-grid" id="serviceGrid"></div>
-      </section>
-
-      <section id="portfolio" class="section section-alt fade-in">
-        <div class="container">
-          <h2>What’s Possible</h2>
-          <p class="section-subtitle">Interactive sample dashboard simulation</p>
-
-          <div class="dashboard-sim">
-            <div class="controls">
-              <label for="rangeInput">Automation Level</label>
-              <input id="rangeInput" type="range" min="0" max="100" value="45" />
-            </div>
-            <div class="sim-kpis">
-              <article>
-                <h3>Hours Saved</h3>
-                <p id="kpiHours">18h/mo</p>
-              </article>
-              <article>
-                <h3>Error Reduction</h3>
-                <p id="kpiErrors">32%</p>
-              </article>
-              <article>
-                <h3>Decision Speed</h3>
-                <p id="kpiSpeed">1.5x</p>
-              </article>
-            </div>
-          </div>
-
-          <div class="testimonials">
-            <article>
-              <p>“Our manual reporting became a live dashboard in two weeks.”</p>
-              <span>— Placeholder Client, Operations Lead</span>
-            </article>
-            <article>
-              <p>“Inventory errors dropped dramatically after automation.”</p>
-              <span>— Placeholder Client, Retail Manager</span>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section id="news" class="section container fade-in">
-        <h2 id="newsHeading">Tech News Near You</h2>
-        <p id="locationInfo">Detecting location preference...</p>
-        <div id="newsList" class="news-grid" aria-live="polite"></div>
-      </section>
-
-      <section id="contact" class="section fade-in">
-        <div class="container contact-wrap">
-          <div>
-            <h2>Let’s Build Your Competitive Edge</h2>
-            <p>
-              Bring your workflow challenge and get a high-impact plan tailored to your goals.
-            </p>
-          </div>
-          <form id="contactForm" class="contact-form">
-            <label for="name">Name</label>
-            <input id="name" name="name" type="text" required />
-
-            <label for="email">Email</label>
-            <input id="email" name="email" type="email" required />
-
-            <label for="message">Project Brief</label>
-            <textarea id="message" name="message" rows="5" required></textarea>
-
-            <button type="submit" class="btn btn-primary">Request Proposal</button>
-          </form>
-        </div>
-      </section>
-    </main>
-
-    <a href="#contact" id="floatingCta" class="floating-cta">Get Your Custom Site</a>
-
-    <footer class="site-footer">
-      <p>© <span id="year"></span> DevCraftStudio. Crafted for speed, clarity, and growth.</p>
-    </footer>
+    <script src="script.js"></script>
   </body>
 </html>
