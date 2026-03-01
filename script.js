@@ -37,11 +37,28 @@ const IND_MUL = {
   finance:   { h:0.75, e:1.35, s:0.9 },
 };
 
+const HEADER_FONTS = {
+  space: "'Space Grotesk', system-ui, sans-serif",
+  exo: "'Exo 2', system-ui, sans-serif",
+  rajdhani: "'Rajdhani', system-ui, sans-serif",
+  syne: "'Syne', system-ui, sans-serif",
+};
+
+const ACCENT_THEMES = {
+  lime:   { dark:'#c8ff00', light:'#85b800' },
+  cyan:   { dark:'#3ad8ff', light:'#0092cc' },
+  violet: { dark:'#8b7bff', light:'#5540f6' },
+  coral:  { dark:'#ff6b8f', light:'#cf2b58' },
+};
+
+
 /* ── STATE ───────────────────────────────────────────────── */
 const S = {
   theme: 'dark',   // default — no localStorage
   industry: 'retail',
   quoteIdx: 0,
+  font: 'space',
+  accent: 'cyan',
   fx: { ...FX },
 };
 
@@ -51,12 +68,35 @@ const $$ = (s, r=document) => [...r.querySelectorAll(s)];
 const lerp  = (a,b,t) => a + (b-a)*t;
 const clamp = (v,mn,mx) => Math.min(Math.max(v,mn),mx);
 
+function hexToRgb(hex) {
+  const h = hex.replace('#', '');
+  const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
+  const n = parseInt(full, 16);
+  return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`;
+}
+
+function setHeaderFont(key) {
+  const font = HEADER_FONTS[key] || HEADER_FONTS.space;
+  S.font = HEADER_FONTS[key] ? key : 'space';
+  document.documentElement.style.setProperty('--f-head', font);
+}
+
+function setAccent(key) {
+  const palette = ACCENT_THEMES[key] || ACCENT_THEMES.cyan;
+  S.accent = ACCENT_THEMES[key] ? key : 'cyan';
+  const hex = palette[S.theme] || palette.dark;
+  document.documentElement.style.setProperty('--acc', hex);
+  document.documentElement.style.setProperty('--acc-rgb', hexToRgb(hex));
+}
+
+
 /* ── THEME (in-memory only, no localStorage) ─────────────── */
 function setTheme(t) {
   S.theme = t;
   document.documentElement.setAttribute('data-theme', t);
   const icon = $('#themeBtn');
   if (icon) icon.textContent = t === 'dark' ? '◑' : '◐';
+  setAccent(S.accent);
   // redraw chart with correct colours
   const rv = $('#autoRange');
   if (rv) drawBar(+rv.value);
@@ -92,9 +132,8 @@ function initCanvas() {
 
   function draw() {
     ctx.clearRect(0, 0, w, h);
-    const isDark = S.theme === 'dark';
-    const col = isDark ? '200,255,0' : '26,10,255';
-
+    const col = getComputedStyle(document.documentElement).getPropertyValue('--acc-rgb').trim() || '58,216,255';
+    
     pts.forEach(p => {
       p.x += p.vx; p.y += p.vy;
       if (p.x < 0) p.x = w;
@@ -374,7 +413,8 @@ function drawBar(level) {
   ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
   const isDark = S.theme === 'dark';
-  const accentCol = isDark ? '#c8ff00' : '#1a0aff';
+   const accentCol = getComputedStyle(document.documentElement).getPropertyValue('--acc').trim() || '#3ad8ff';
+  
   const mutedCol  = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)';
   const textCol   = isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.4)';
 
@@ -420,12 +460,11 @@ function updateKpis(level) {
   animKpi('#kv1', v.e);
   animKpi('#kv2', parseFloat(v.s));
   $('#autoVal').textContent = level+'%';
-
-  const isDark = S.theme === 'dark';
-  sparkline('#sp0', v.h/40,          isDark?'#c8ff00':'#1a0aff');
-  sparkline('#sp1', v.e/70,          isDark?'#ff4060':'#d4001a');
-  sparkline('#sp2', parseFloat(v.s)/2, isDark?'#ffcc00':'#b8860b');
-
+    const accentCol = getComputedStyle(document.documentElement).getPropertyValue('--acc').trim() || '#3ad8ff';
+  sparkline('#sp0', v.h/40,            accentCol);
+  sparkline('#sp1', v.e/70,            S.theme==='dark'?'#ff4060':'#d4001a');
+  sparkline('#sp2', parseFloat(v.s)/2, S.theme==='dark'?'#ffcc00':'#b8860b');
+  
   drawBar(level);
 }
 
@@ -646,9 +685,26 @@ function init() {
   setTheme('dark');   // always start dark — no localStorage
   setYear();
 
-  // theme toggle
+   // theme + personalization controls
   $('#themeBtn')?.addEventListener('click', () => { toggleTheme(); });
 
+  const fontSelect = $('#fontSelect');
+  if (fontSelect) {
+    fontSelect.value = S.font;
+    fontSelect.addEventListener('change', e => setHeaderFont(e.target.value));
+  }
+
+  const accentSelect = $('#accentSelect');
+  if (accentSelect) {
+    accentSelect.value = S.accent;
+    accentSelect.addEventListener('change', e => {
+      setAccent(e.target.value);
+      const rv = $('#autoRange');
+      if (rv) drawBar(+rv.value);
+    });
+  }
+
+  setHeaderFont(S.font);
   initCanvas();
   initCursor();
   initCounters();

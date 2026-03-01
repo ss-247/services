@@ -8,7 +8,7 @@
   <meta name="theme-color" content="#05050a" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@300;400;700&family=Playfair+Display:ital@1&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;800&family=Exo+2:wght@500;700;800&family=Rajdhani:wght@500;700&family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@300;400;700&family=Playfair+Display:ital@1&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -59,8 +59,25 @@
     </div>
 
     <div class="nav-end">
-      <button class="theme-btn" id="themeBtn" aria-label="Toggle theme">◑</button>
-      <button class="nav-cta" onclick="openModal('contactModal')">Hire Me ↗</button>
+      <div class="nav-controls">
+        <label class="visually-hidden" for="fontSelect">Header font</label>
+        <select id="fontSelect" class="nav-select" aria-label="Choose header font">
+          <option value="space">Space Grotesk</option>
+          <option value="exo">Exo 2</option>
+          <option value="rajdhani">Rajdhani</option>
+          <option value="syne">Syne</option>
+        </select>
+
+        <label class="visually-hidden" for="accentSelect">Accent color</label>
+        <select id="accentSelect" class="nav-select" aria-label="Choose accent color">
+          <option value="lime">Lime</option>
+          <option value="cyan">Cyan</option>
+          <option value="violet">Violet</option>
+          <option value="coral">Coral</option>
+        </select>
+      </div>
+      <button class="theme-btn" id="themeBtn" aria-label="Toggle dark and light theme">◑</button>
+      <button class="nav-cta" onclick="openModal('contactModal')">Contact Me ↗</button>
       <button class="burger" id="burger" aria-label="Menu"><span></span><span></span></button>
     </div>
   </nav>
@@ -316,7 +333,7 @@
   </footer>
 
   <!-- FAB -->
-  <button class="fab" id="fab" onclick="openModal('contactModal')" aria-label="Hire me">Hire me ↗</button>
+  <button class="fab" id="fab" onclick="openModal('contactModal')" aria-label="Contact me">Hire me ↗</button>
 
   <!-- ─── MODAL: CONTACT ────────────────────────────────────────── -->
   <div class="modal" id="contactModal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
