@@ -77,7 +77,13 @@
         </select>
       </div>
       <button class="theme-btn" id="themeBtn" aria-label="Toggle dark and light theme">◑</button>
-      <button class="nav-cta" onclick="openModal('contactModal')">Contact Me ↗</button>
+      <!-- <button class="nav-cta" onclick="openModal('contactModal')">Contact Me ↗</button> -->
+      
+      <button onclick="toggleECR()" class="nav-cta" id="ecrPlayBtn">▶ ECR LIVE</button>
+            <audio id="ecrPlayer" src="https://edge.iono.fm/xice/ecr_live_high.aac" preload="none"></audio>
+
+
+
       <button class="burger" id="burger" aria-label="Menu"><span></span><span></span></button>
     </div>
   </nav>
