@@ -749,5 +749,20 @@ function init() {
   console.log('init() finished');
 }
 
+let isPlaying = false;
+function toggleECR() {
+  const audio = document.getElementById('ecrPlayer');
+  const btn = document.getElementById('ecrPlayBtn');
+  if (isPlaying) {
+    audio.pause();
+    btn.textContent = '▶ PLAY LIVE';
+  } else {
+    audio.play();
+    btn.textContent = '❚❚ PAUSE';
+  }
+  isPlaying = !isPlaying;
+}
+
 if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
 else init();
+

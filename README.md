@@ -253,21 +253,14 @@ const CLOCKS = [
 
 ---
 
-### Feed Section (04)
+## What's New (v3.1 — March 2026)
 
-Fetches from `https://hnrss.org/frontpage.jsonfeed` — Hacker News front page as a JSON Feed. Free, no API key, no rate limit for normal use. Displays 9 stories.
-
-Geolocation is requested to personalise the heading. Denied or unavailable = silent fallback to "Global tech feed".
-
-**To use a different source**, replace the fetch in `fetchNews()`:
-
-```js
-// NewsAPI (free tier — newsapi.org)
-const res  = await fetch('https://newsapi.org/v2/top-headlines?category=technology&apiKey=YOUR_KEY');
-const data = await res.json();
-const items = data.articles.slice(0, 9);
-// map: item.title, item.description, item.url, item.publishedAt
-```
+- **Fixed ROI calculator** — sliders now update live (hours wasted, team size, hourly rate → monthly cost of *not* automating)
+- **Local KZN news feed** — replaced global Hacker News with East Coast Radio Newswatch bulletins via RSS → JSON conversion
+- **East Coast Radio Live player** — embedded play/pause button streaming 94.5 FM direct from Umhlanga (medium quality AAC stream)
+- **CORS workaround** — added reliable proxy for RSS/JSON feeds so they load from GitHub Pages
+- **Improved robustness** — better event listener attachment, fallback events, console warnings for missing elements
+- **Theming & personalization** — header font selector, accent colour picker, always starts in dark mode
 
 ---
 

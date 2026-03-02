@@ -283,7 +283,7 @@
         </div>
         <div class="clocks-grid" id="clocksGrid"></div>
       </div>
-      
+
       <!-- EAST COAST RADIO — LIVE -->
       <div class="tool-card">
         <div class="tool-hd">
@@ -295,10 +295,12 @@
           <p style="font-size:0.9rem; line-height:1.45; color:var(--muted); margin-bottom:1.4rem;">
             KZN’s #1 Hit Music Station — broadcasting live from Umhlanga, Durban.
           </p>
-          <button onclick="window.open('https://www.ecr.co.za/listen-live/', '_blank')" 
+          <!-- <button onclick="window.open('https://www.ecr.co.za/listen-live/', '_blank')" 
                   class="btn-main btn-full">
             🔴 LISTEN LIVE NOW
-          </button>
+          </button> -->
+          <button onclick="toggleECR()" class="btn-main btn-full" id="ecrPlayBtn">▶ PLAY LIVE</button>
+            <audio id="ecrPlayer" src="https://edge.iono.fm/xice/ecr_live_high.aac" preload="none"></audio>
           <p class="conv-rate" style="margin-top:1rem; text-align:center; font-size:0.68rem;">
             Also on 94.0–96.6 FM • DStv Audio 836 • ECR App
           </p>
