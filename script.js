@@ -520,6 +520,27 @@ function initConverter() {
 }
 
 /* ── ROI ─────────────────────────────────────────────────── */
+
+function initROI() {
+  const sliders = [
+    document.getElementById('rH'),
+    document.getElementById('rT'),
+    document.getElementById('rR')
+  ];
+
+  sliders.forEach(slider => {
+    if (slider) {
+      slider.addEventListener('input', updateROI);
+      slider.addEventListener('change', updateROI);   // fallback for some older browsers/touch
+    } else {
+      console.warn('ROI slider missing:', slider);
+    }
+  });
+
+  // Initial calculation
+  updateROI();
+}
+
 function updateROI() {
   const h = +$('#rH').value;
   const t = +$('#rT').value;
@@ -531,10 +552,7 @@ function updateROI() {
   $('#roiBig').textContent = 'R'+Math.round(monthly).toLocaleString('en-ZA');
 }
 
-function initROI() {
-  ['rH','rT','rR'].forEach(id => $(id)?.addEventListener('input', updateROI));
-  updateROI();
-}
+
 
 /* ── CLOCKS ──────────────────────────────────────────────── */
 function renderClocks() {
@@ -559,46 +577,48 @@ function tickClocks() {
 }
 
 /* ── NEWS ────────────────────────────────────────────────── */
-async function fetchNews(country='') {
+/* ── DURBAN & KZN LOCAL FEED (replaces Hacker News) ───────────── */
+async function fetchDurbanNews() {
   const g = $('#newsGrid');
   if (!g) return;
-  g.innerHTML = `<p style="color:var(--muted);font-family:var(--f-mono);font-size:.8rem;padding:1rem;grid-column:1/-1;">Loading feed…</p>`;
-  try {
-    const res  = await fetch('https://hnrss.org/frontpage.jsonfeed');
-    const feed = await res.json();
-    const items = (feed.items||[]).slice(0,9);
-    g.innerHTML = items.map((item,i)=>`
-      <article class="news-card reveal" style="transition-delay:${i*.05}s">
-        <span class="nc-meta">HN · ${new Date(item.date_published||Date.now()).toLocaleDateString('en-ZA',{month:'short',day:'numeric'})}</span>
-        <h3 class="nc-title">${item.title||'Untitled'}</h3>
-        <p class="nc-sub">${country?`Trending with developers in ${country}.`:'Global developer headline.'}</p>
-        <a class="nc-link" href="${item.url||'#'}" target="_blank" rel="noopener noreferrer">Read story →</a>
-      </article>
-    `).join('');
-    // re-trigger reveal for new nodes
-    setTimeout(initReveal, 50);
-  } catch {
-    g.innerHTML = `<p style="color:var(--muted);font-family:var(--f-mono);font-size:.8rem;padding:1rem;grid-column:1/-1;">Feed unavailable. Check your connection or try refreshing.</p>`;
-  }
-}
 
-async function geoNews() {
-  const loc = $('#newsLoc');
-  if (!loc) return;
-  if (!('geolocation' in navigator)) { loc.textContent='Showing global tech feed.'; fetchNews(); return; }
-  navigator.geolocation.getCurrentPosition(
-    async pos => {
-      try {
-        const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
-        const d = await r.json();
-        const country = d.address?.country||'your region';
-        loc.textContent = `Developer headlines · ${country}`;
-        fetchNews(country);
-      } catch { loc.textContent='Global tech feed.'; fetchNews(); }
-    },
-    () => { loc.textContent='Global tech feed.'; fetchNews(); },
-    { timeout:6000 }
-  );
+  g.innerHTML = `<p style="color:var(--muted);font-family:var(--f-mono);font-size:.8rem;padding:1rem;grid-column:1/-1;">Loading Durban & KZN feed…</p>`;
+
+  try {
+    const feedUrl = 'https://unfolddurban.co.za/feed';
+    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(feedUrl);
+
+    const res = await fetch(proxyUrl);
+    const text = await res.text();
+
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(text, 'text/xml');
+    const items = xml.querySelectorAll('item');
+
+    let html = '';
+    Array.from(items).slice(0, 9).forEach((item, i) => {
+      const title   = item.querySelector('title')?.textContent?.trim() || 'Untitled';
+      const link    = item.querySelector('link')?.textContent?.trim() || '#';
+      const pubDate = item.querySelector('pubDate')?.textContent;
+      const date    = pubDate ? new Date(pubDate).toLocaleDateString('en-ZA', {month:'short', day:'numeric'}) : '';
+
+      html += `
+        <article class="news-card reveal" style="transition-delay:${i * 0.05}s">
+          <span class="nc-meta">Durban · ${date}</span>
+          <h3 class="nc-title">${title}</h3>
+          <p class="nc-sub">Local Durban & KZN lifestyle, events & business.</p>
+          <a class="nc-link" href="${link}" target="_blank" rel="noopener noreferrer">Read full story →</a>
+        </article>
+      `;
+    });
+
+    g.innerHTML = html || `<p>No stories right now.</p>`;
+    setTimeout(initReveal, 50);
+
+  } catch (err) {
+    console.error(err);
+    g.innerHTML = `<p style="color:var(--muted);font-family:var(--f-mono);font-size:.8rem;padding:1rem;grid-column:1/-1;">Local feed temporarily unavailable.<br>Try refreshing.</p>`;
+  }
 }
 
 /* ── MODALS ──────────────────────────────────────────────── */
@@ -684,6 +704,7 @@ function setYear() {
 function init() {
   setTheme('dark');   // always start dark — no localStorage
   setYear();
+  console.log('init() started');
 
    // theme + personalization controls
   $('#themeBtn')?.addEventListener('click', () => { toggleTheme(); });
@@ -718,13 +739,14 @@ function init() {
   initNav();
   initReveal();
   initContactForm();
-  geoNews();
+  fetchDurbanNews();
 
   // tickers
   tickerTick();
   setInterval(tickerTick, 5000);
   tickClocks();
   setInterval(tickClocks, 1000);
+  console.log('init() finished');
 }
 
 if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
