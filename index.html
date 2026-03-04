@@ -371,7 +371,22 @@
       <button class="modal-x" onclick="closeModal('contactModal')" aria-label="Close">×</button>
       <h2 id="mTitle" class="modal-h">Start a Project</h2>
       <p class="modal-sub">I'll reply within 24 hours.</p>
-      <form id="contactForm" class="m-form" data-netlify="true">
+
+      <!-- ── IMPORTANT CHANGES HERE ──────────────────────────────────────── -->
+      <form id="contactForm" class="m-form" 
+            name="portfolio-contact"          
+            method="POST"                     
+            data-netlify="true" 
+            netlify-honeypot="bot-field">     
+
+        <!-- Hidden fields Netlify needs / wants -->
+        <input type="hidden" name="form-name" value="portfolio-contact" />
+        <!-- Honeypot (leave this – users won't see it if you hide via CSS) -->
+        <p class="honeypot" style="display:none;">
+          <label>Don’t fill this: <input name="bot-field" tabindex="-1" autocomplete="off" /></label>
+        </p>
+
+        <!-- Your existing fields – unchanged -->
         <div class="m-row">
           <div class="m-field">
             <label for="mName">Name</label>
@@ -400,11 +415,12 @@
           <label for="mMsg">Project brief</label>
           <textarea id="mMsg" name="message" rows="4" placeholder="Describe the problem you need solved…" required></textarea>
         </div>
+
         <button type="submit" class="btn-main btn-full">Send Request ↗</button>
         <p class="m-status" id="mStatus"></p>
       </form>
-    </div>
   </div>
+</div>
 
   <script src="script.js"></script>
 </body>

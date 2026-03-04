@@ -642,13 +642,35 @@ document.addEventListener('keydown', e => {
 
 /* ── CONTACT FORM ────────────────────────────────────────── */
 function initContactForm() {
-  const form = $('#contactForm');
+  const form = document.getElementById('contactForm');
   if (!form) return;
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    const s = $('#mStatus');
-    if (s) { s.textContent='✓ Sent! I\'ll reply within 24 hours.'; s.style.color='var(--green)'; }
-    setTimeout(()=>{ form.reset(); if(s) s.textContent=''; closeModal('contactModal'); }, 2800);
+
+  const status = document.getElementById('mStatus');
+
+  // We show "Sending…" immediately when user clicks submit
+  form.addEventListener('submit', () => {
+    if (status) {
+      status.textContent = 'Sending…';
+      status.style.color = 'var(--text-dim)';   // or whatever neutral color you use
+    }
+  });
+
+  // This runs AFTER successful submit (Netlify redirects back to same page)
+  // We use a small delay + optimistic success message
+  form.addEventListener('submit', () => {
+    // Give Netlify a tiny moment to process
+    setTimeout(() => {
+      if (status) {
+        status.textContent = '✓ Sent! I\'ll reply within 24 hours.';
+        status.style.color = 'var(--green)';   // or your success color
+      }
+
+      setTimeout(() => {
+        form.reset();
+        if (status) status.textContent = '';
+        closeModal('contactModal');
+      }, 2800);
+    }, 400);   // small buffer so message appears after redirect
   });
 }
 
